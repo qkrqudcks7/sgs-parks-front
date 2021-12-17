@@ -1,28 +1,28 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <router-view />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { mapState, mapGetters } from "vuex";
 
 export default {
   name: 'App',
-  components: {
-    HelloWorld
+  mounted() {
+    if (this.user !== undefined && this.authToken !== undefined) {
+      this.$router.replace("/main/dashboard")
+    } else {
+      this.$router.replace("/login");
+    }
+  },
+  computed: {
+    ...mapState("account",["user","authToken"]),
+    ...mapGetters("account",["user","authToken"])
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+
 </style>
