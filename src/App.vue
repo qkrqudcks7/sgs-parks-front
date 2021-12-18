@@ -12,7 +12,8 @@ export default {
   mounted() {
     if (this.user !== undefined && this.authToken !== undefined) {
       this.$router.replace("/main/dashboard")
-    } else {
+    }
+    else {
       this.$router.replace("/login");
     }
   },

@@ -23,7 +23,7 @@
         회원가입
       </a-button>
     </a-form-model-item>
-    <a-modal ref="modal" v-model="visible" title="회원가입" :ok-button-props="{ props: { disabled: (check === false || emailCheck === false) ? true : false } }" @ok="handleOk" ok-text="가입" cancel-text="취소">
+    <a-modal ref="modal" v-model="visible" title="회원가입" :ok-button-props="{ props: { disabled: (check === false || emailCheck === false) ? true : false } }" @ok="signUpForm" ok-text="가입" cancel-text="취소">
       <a-form-model
           ref="ruleForm"
           :model="form"
@@ -48,6 +48,7 @@
               <a-input
                   v-model="form.email"
                   placeholder="이메일을 입력해주세요"
+                  :disabled="check"
                   @blur="
               () => {
                 $refs.email.onFieldBlur();
@@ -56,24 +57,38 @@
               </a-input>
             </a-col>
             <a-col flex="2">
-              <a-button type="danger" @click="doubleCheck">
-                중복확인
+              <a-button type="danger" @click="doubleCheck" :disabled="check">
+                {{check ? "완료" : "중복 인증"}}
               </a-button>
             </a-col>
           </a-row>
         </a-form-model-item>
-        <a-form-model-item ref="email" label="인증" prop="email">
+        <a-form-model-item label="인증">
+          <a-row type="flex">
+            <a-col flex="4">
+              <small>
+                이메일 인증을 해주세요.
+              </small>
+            </a-col>
+            <a-col flex="2">
+              <a-button type="danger" @click="emailChk" :disabled="emailCheck">
+                {{emailCheck ? "완료" : "이메일 인증"}}
+              </a-button>
+            </a-col>
+          </a-row>
+        </a-form-model-item>
+        <a-form-model-item ref="emailCheckingState" label="인증 코드" prop="emailCheckingState">
           <a-row type="flex">
             <a-col flex="4">
               <a-input
-                  v-model="emailCheckingState"
-                  disabled="true"
+                  v-model="codeNumber2"
+                  placeholder="인증코드를 입력하세요"
               >
               </a-input>
             </a-col>
             <a-col flex="2">
-              <a-button type="danger" @click="emailChk">
-                이메일 인증
+              <a-button type="danger" @click="codeCheck" :disabled="codeCheckState">
+                {{codeCheckState ? "완료" :"확인"}}
               </a-button>
             </a-col>
           </a-row>
@@ -86,19 +101,6 @@
               @blur="
           () => {
             $refs.password.onFieldBlur();
-          }
-        ">
-            <a-icon slot="prefix" type="lock" style="color:rgba(0,0,0,.25)" />
-          </a-input>
-        </a-form-model-item>
-        <a-form-model-item ref="passwordCheck" label="일치 확인" prop="passwordCheck">
-          <a-input
-              v-model="form.passwordCheck"
-              type="password"
-              placeholder="비밀번호를 다시 입력해주세요"
-              @blur="
-          () => {
-            $refs.passwordCheck.onFieldBlur();
           }
         ">
             <a-icon slot="prefix" type="lock" style="color:rgba(0,0,0,.25)" />
@@ -126,7 +128,10 @@ export default {
       wrapperCol: { span: 14 },
       check: false,
       emailCheck: false,
-      emailCheckingState: "미인증",
+      emailCheckingState: "",
+      codeCheckState: false,
+      codeNumber: '',
+      codeNumber2: '',
       form: {
         name: '',
         email: '',
@@ -145,10 +150,6 @@ export default {
         password: [
           { required: true, message: '비밀번호를 입력하세요', trigger: 'blur' },
           { min: 7, max: 15, message: '7~15자 사이로 입력하세요.', trigger: 'blur' },
-        ],
-        passwordCheck: [
-          { required: true, message: '비밀번호를 입력하세요', trigger: 'blur' },
-          { validator: this.passwordDoubleCheck}
         ]
       },
     };
@@ -164,13 +165,13 @@ export default {
   },
   computed: {
     ...mapState("account",["user","authToken"]),
-    ...mapGetters("account",["user","authToken"])
+    ...mapGetters("account",["user","authToken"]),
   },
   methods: {
     ...mapMutations("account", ["setUser","setAuthToken"]),
     handleSubmit(e) {
       e.preventDefault();
-      apis.users.login
+      apis.users
           .loginUser({
             email: this.formInline.email,
             password: this.formInline.password
@@ -185,38 +186,56 @@ export default {
               this.setAuthToken(res.data.accessToken)
               this.$router.replace("/main/dashboard")
             }
-          }).catch(e => {
-        console.log(e)
+          }).catch(() => {
+        alert("아이디와 비밀번호를 확인하세요!")
       })
     },
     showModal() {
       this.visible = true
-      this.$refs.ruleForm.validate(valid => {
-        if (valid) {
-          alert('submit!');
-        } else {
-          console.log('error submit!!');
-          return false;
-        }
-      });
     },
-    handleOk(e) {
-      console.log(e)
+    signUpForm() {
+      apis.users
+      .signUp({
+        email: this.form.email,
+        password: this.form.password,
+        name: this.form.name
+      })
+      .then(res => {
+        if (res.data) {
+          console.log(res.data)
+        }
+      })
       this.visible = false
     },
     doubleCheck() {
-      this.check = true
+      apis.users
+      .doubleEmailCheck(this.form.email)
+      .then(res => {
+        if (res.data === false) {
+          this.check = true
+          alert("사용할 수 있는 이메일입니다.")
+        } else {
+          alert("이미 존재하는 이메일입니다.")
+        }
+      })
     },
     emailChk() {
+      apis.users
+      .sendEmail(this.form.email)
+      .then(res => {
+        if (res.status === 200) {
+          alert("해당 이메일을 확인해주세요.")
+          this.codeNumber = res.data
+        }
+      })
       this.emailCheck = true
       this.emailCheckingState = "인증 완료"
     },
-    passwordDoubleCheck(rule,value,callback) {
-      const form = this.form;
-      if (value && value !== form.getFieldValue('password')) {
-        callback('Two passwords that you enter is inconsistent!');
+    codeCheck() {
+      if (this.codeNumber === this.codeNumber2) {
+        this.codeCheckState = true
       } else {
-        callback();
+        alert("일치하지 않습니다.")
       }
     }
   },

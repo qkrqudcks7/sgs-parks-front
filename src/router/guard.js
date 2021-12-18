@@ -4,6 +4,7 @@ function loadGuard(router,store) {
             next()
         } else {
             const token = store.getters["account/authToken"]
+            console.log(token)
 
             if (to.params?.message === "resetStore") {
                 if (to.params?.type === "logout") {
@@ -13,6 +14,7 @@ function loadGuard(router,store) {
                 }
                 clearStore();
             } else if (token === undefined) {
+                console.log("2")
                 next({name: "로그인", params: {message: "sessionOut"}})
                 clearStore()
             } else {

@@ -7,14 +7,8 @@
         @back="() => $router.go(-1)"
     >
       <template slot="extra">
-        <a-button key="3">
-          Operation
-        </a-button>
-        <a-button key="2">
-          Operation
-        </a-button>
-        <a-button key="1" type="primary">
-          Primary
+        <a-button>
+          내 정보
         </a-button>
       </template>
     </a-page-header>
