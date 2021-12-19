@@ -26,6 +26,11 @@ const routes = [
                         path: "dashboard",
                         name: "대시보드",
                         component: () => import("@/views/dashboard.vue")
+                    },
+                    {
+                        path: "admin-dashboard",
+                        name: "관리자모드",
+                        component: () => import("@/views/adminDashboard.vue")
                     }
                 ]
             }

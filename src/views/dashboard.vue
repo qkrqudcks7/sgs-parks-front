@@ -1,6 +1,7 @@
 <template>
-<div>
-</div>
+  <div>
+    일반 유저 모드입니다. 꾸밀 시간이 없네요.
+  </div>
 </template>
 
 <script>

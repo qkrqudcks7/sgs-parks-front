@@ -1,16 +1,16 @@
 <template>
   <a-layout>
-    <Header></Header>
+    <h-header></h-header>
     <router-view />
   </a-layout>
 </template>
 
 <script>
-import Header from "@/components/header";
+import HHeader from "@/components/header";
 export default {
   name: "MainLayout",
   components: {
-    Header
+    HHeader
   }
 }
 </script>

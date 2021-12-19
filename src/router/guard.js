@@ -4,7 +4,15 @@ function loadGuard(router,store) {
             next()
         } else {
             const token = store.getters["account/authToken"]
-            console.log(token)
+            const user = store.getters["account/user"]
+
+            if (to.path === "/main/dashboard") {
+                console.log(user.role)
+                if (user.role === "ROLE_ADMIN") {
+                    alert("관리자 모드로 입장합니다")
+                    next({name: "관리자모드"})
+                }
+            }
 
             if (to.params?.message === "resetStore") {
                 if (to.params?.type === "logout") {
@@ -14,7 +22,6 @@ function loadGuard(router,store) {
                 }
                 clearStore();
             } else if (token === undefined) {
-                console.log("2")
                 next({name: "로그인", params: {message: "sessionOut"}})
                 clearStore()
             } else {

@@ -45,6 +45,24 @@ export default {
                 }
             }
             return axiosObj(axiosOpt)
+        },
+        userList() {
+            let axiosOpt = {
+                url: urls.users.userList,
+                method: "get"
+            }
+            return axiosObj(axiosOpt)
+        },
+        passwordChange(userInfo) {
+            let axiosOpt = {
+                url: urls.users.changePassword,
+                method: "put",
+                data: {
+                    email: userInfo.email,
+                    password: userInfo.password
+                }
+            }
+            return axiosObj(axiosOpt)
         }
     }
 }

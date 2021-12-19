@@ -6,7 +6,17 @@ export default {
     },
     getters: {
         authToken: state => {
-          return state.authToken
+            if (!state.authToken) {
+                try {
+                    const token = localStorage.getItem("token")
+                    if (token) {
+                        state.authToken = JSON.parse(token)
+                    }
+                } catch (e) {
+                    console.error(e)
+                }
+            }
+            return state.authToken
         },
         user: state => {
             if (!state.user) {
@@ -25,6 +35,7 @@ export default {
     mutations: {
         setAuthToken(state,authToken) {
             state.authToken = authToken
+            localStorage.setItem("token",JSON.stringify(authToken))
         },
         setUser(state,user) {
             state.user = user
@@ -32,6 +43,7 @@ export default {
         },
         resetAccount(state) {
             localStorage.removeItem("user")
+            localStorage.removeItem("token")
             Object.assign(state, {user: undefined, authToken: undefined})
         }
     }
