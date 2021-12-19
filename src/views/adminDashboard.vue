@@ -18,6 +18,28 @@
         bordered
     >
     </a-table>
+    <a-modal ref="modal" v-model="visible" title="권한 변경" ok-text="변경하기" cancel-text="취소" @ok="modifyRole">
+      <a-form-model
+          ref="ruleForm"
+          :label-col="labelCol"
+          :wrapper-col="wrapperCol"
+      >
+        <p>이메일: {{form.email}}</p>
+        <p>이름: {{form.name}}</p>
+        <p>권한: {{form.role}}</p>
+        <a-select :default-value="form.role" style="width: 200px" @change="handleChange">
+          <a-select-option value="ROLE_MASTER" disabled>
+            ROLE_MASTER
+          </a-select-option>
+          <a-select-option value="ROLE_ADMIN">
+            ROLE_ADMIN
+          </a-select-option>
+          <a-select-option value="ROLE_USER">
+            ROLE_USER
+          </a-select-option>
+        </a-select>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 
@@ -62,7 +84,12 @@ export default {
         ]
       },
       faultChartLegend: null,
-      loaded: false
+      loaded: false,
+      visible: false,
+      form: '',
+      labelCol: { span: 4 },
+      wrapperCol: { span: 14 },
+      changedRole: ''
     }
   },
   async mounted() {
@@ -87,6 +114,26 @@ export default {
 
   },
   methods: {
+    async getUserList () {
+      this.loaded = false
+      await api.users.userList()
+          .then(async res => {
+            if (res.status===200) {
+              this.data = res.data
+              let u = 0
+              let a = 0
+              for (let i = 0;i<res.data.length;i++) {
+                if (res.data[i].role ==="ROLE_ADMIN") {
+                  a+=1
+                } else {
+                  u+=1
+                }
+              }
+              this.faultData.datasets[0].data = [a,u,1]
+              this.loaded = true
+            }
+          })
+    },
     rowClassName(record,index) {
       return index === this.selectedRowIndex ? "click-active-row" : ""
     },
@@ -94,10 +141,37 @@ export default {
       return {
         on: {
           click: () => {
+            console.log(record.email)
+            this.form = {
+              email: record.email,
+              name: record.name,
+              role: record.role
+            }
+            console.log(this.form)
+            this.visible = true
             this.selectedRowIndex = index
           }
         }
       }
+    },
+    handleChange(value) {
+      this.changedRole = value
+    },
+    modifyRole() {
+      api.users.changeRole({
+        email: this.form.email,
+        role: this.changedRole
+      })
+      .then(res => {
+        if (res.status === 200) {
+          alert(this.changedRole + "으로 변경되었습니다.")
+          this.visible = false
+          this.getUserList()
+        } else {
+          alert("오류가 생겼습니다.")
+          this.visible = false
+        }
+      })
     }
   }
 }

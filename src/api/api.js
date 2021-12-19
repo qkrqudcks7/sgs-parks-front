@@ -63,6 +63,17 @@ export default {
                 }
             }
             return axiosObj(axiosOpt)
+        },
+        changeRole(userInfo) {
+            let axiosOpt = {
+                url: urls.users.changeRole,
+                method: "put",
+                data: {
+                    email: userInfo.email,
+                    role: userInfo.role
+                }
+            }
+            return axiosObj(axiosOpt)
         }
     }
 }

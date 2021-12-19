@@ -6,8 +6,9 @@ export const URLS = {
         checkEmail: `checkemail`,
         sendCheckPasswordEmail: `sendpassword`,
         changePassword: `changepassword`,
-        doubleEmailCheck: 'doublecheckemail',
-        userList: 'user'
+        doubleEmailCheck: `doublecheckemail`,
+        userList: `user`,
+        changeRole: `changerole`,
     }
 }
 
